@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="FootballPro — Train slimmer, groei sneller.">
+  <meta name="theme-color" content="#08090f">
+  <title>FootballPro — Ontwikkel Je Spel</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <noscript>
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#08090f;color:#e8e8f0;flex-direction:column;gap:16px;padding:20px;text-align:center;">
+      <div style="font-size:3rem">⚽</div>
+      <h1 style="font-size:1.5rem;font-weight:800;">FootballPro</h1>
+      <p style="color:#a0a0c0;max-width:300px;">JavaScript is vereist. Schakel het in je browser in.</p>
+    </div>
+  </noscript>
+
+  <!-- Loading screen -->
+  <div id="loading">
+    <div class="loading-ball">⚽</div>
+    <div class="loading-name">FootballPro</div>
+    <div class="loading-sub">Laden...</div>
+  </div>
+
+  <!-- Auth screen -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-icon">⚽</div>
+        <span class="logo-text">FootballPro</span>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab">Inloggen</button>
+        <button class="auth-tab" id="registerTab">Registreren</button>
+      </div>
+
+      <div id="loginForm">
+        <div class="form-group">
+          <label class="form-label">E-mailadres</label>
+          <input type="email" id="loginEmail" placeholder="jouw@email.nl" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Wachtwoord</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary btn-full" id="loginBtn">Inloggen →</button>
+      </div>
+
+      <div id="registerForm" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Volledige naam</label>
+          <input type="text" id="regName" placeholder="Marcus de Vries" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mailadres</label>
+          <input type="email" id="regEmail" placeholder="jouw@email.nl" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Wachtwoord</label>
+          <input type="password" id="regPassword" placeholder="minimaal 6 tekens" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ik ben een...</label>
+          <div class="role-picker" id="rolePicker">
+            <button class="role-pick-btn active" data-role="player">⚽ Speler</button>
+            <button class="role-pick-btn" data-role="trainer">🎓 Trainer</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" id="registerBtn">Account aanmaken →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" style="visibility:hidden">
+    <header class="app-header" id="appHeader"></header>
+    <div class="app-body">
+      <nav class="sidebar" id="sidebar"></nav>
+      <main class="main-content" id="mainContent"></main>
+    </div>
+    <nav class="bottom-nav" id="bottomNav"></nav>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box" id="modalBox">
+      <button class="modal-close" id="modalClose">&#10005;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
