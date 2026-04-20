@@ -925,35 +925,132 @@ function renderTrainerOverview() {
   const pending = state.data.submissions.filter(s => s.status === 'pending').length;
   const total   = state.data.assignments.length;
   const done    = state.data.assignments.filter(a => a.completed).length;
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const cats = Object.keys(ZONE_THEMES);
+
   return `
-    <div class="grid-3" style="margin-bottom:24px;">
-      <div class="stat-card green"><div class="stat-icon">👥</div><div class="stat-value">${players.length}</div><div class="stat-label">Spelers</div></div>
-      <div class="stat-card purple"><div class="stat-icon">✅</div><div class="stat-value">${done}/${total}</div><div class="stat-label">Huiswerk voltooid</div></div>
-      <div class="stat-card gold"><div class="stat-icon">⏳</div><div class="stat-value">${pending}</div><div class="stat-label">Wachten op goedkeuring</div></div>
+    <div class="trainer-stats-row">
+      <div class="trainer-stat-pill">
+        <span class="tsp-icon">👥</span>
+        <span class="tsp-val">${players.length}</span>
+        <span class="tsp-lbl">spelers</span>
+      </div>
+      <div class="trainer-stat-pill">
+        <span class="tsp-icon">✅</span>
+        <span class="tsp-val">${done}/${total}</span>
+        <span class="tsp-lbl">voltooid</span>
+      </div>
+      <div class="trainer-stat-pill ${pending > 0 ? 'tsp-alert' : ''}">
+        <span class="tsp-icon">⏳</span>
+        <span class="tsp-val">${pending}</span>
+        <span class="tsp-lbl">goedkeuring</span>
+      </div>
     </div>
-    <div class="section-header"><div class="section-title">👥 Spelers Overzicht</div></div>
-    ${players.length === 0 ? `<div class="empty-state"><div class="empty-icon">👥</div><p>Nog geen spelers geregistreerd</p></div>` : players.map(p => {
-      const as  = getPlayerAssignments(p.id);
-      const pct = as.length > 0 ? Math.round((as.filter(a=>a.completed).length / as.length) * 100) : 0;
-      const lvl = getLevel(totalPoints(p.id));
-      return `
-        <div class="card" style="margin-bottom:10px;">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="lb-avatar">${p.initials}</div>
-              <div>
-                <div style="display:flex;align-items:center;gap:8px;font-weight:700">${p.name}<span class="level-chip-xs ${lvl.cls}">${lvl.icon} ${lvl.name}</span></div>
-                <div style="font-size:0.78rem;color:var(--text-3)">${as.length} oefeningen toegewezen</div>
+
+    ${players.length === 0
+      ? `<div class="empty-state"><div class="empty-icon">👥</div><p>Nog geen spelers geregistreerd</p></div>`
+      : players.map(p => {
+          const as      = getPlayerAssignments(p.id);
+          const pts     = totalPoints(p.id);
+          const lvl     = getLevel(pts);
+          const weekPts = getWeeklyPoints(p.id);
+          const totalA  = as.length;
+          const doneA   = as.filter(a => a.completed).length;
+          const pct     = totalA > 0 ? Math.round((doneA / totalA) * 100) : 0;
+
+          // Recent activity: last completed assignment
+          const lastDone = as
+            .filter(a => a.completed && a.completedAt)
+            .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))[0];
+          const daysSince = lastDone
+            ? Math.floor((Date.now() - new Date(lastDone.completedAt)) / 86400000)
+            : null;
+          const isLate = daysSince === null ? totalA > 0 : daysSince >= 7;
+
+          // Category breakdown
+          const catBars = cats.map(cat => {
+            const theme  = ZONE_THEMES[cat];
+            const catAs  = as.filter(a => { const ex = getExercise(a.exerciseId); return ex && ex.category === cat; });
+            if (catAs.length === 0) return '';
+            const catPct = Math.round((catAs.filter(a => a.completed).length / catAs.length) * 100);
+            return `
+              <div class="tov-cat-row">
+                <span class="tov-cat-icon">${theme.icon}</span>
+                <div class="tov-cat-bar-wrap">
+                  <div class="tov-cat-bar-fill" style="width:${catPct}%;background:${theme.color}"></div>
+                </div>
+                <span class="tov-cat-pct" style="color:${theme.color}">${catPct}%</span>
+              </div>`;
+          }).join('');
+
+          // Open (not completed) assignments — show up to 3
+          const openAs = as.filter(a => !a.completed).slice(0, 3);
+          const openList = openAs.map(a => {
+            const ex = getExercise(a.exerciseId);
+            if (!ex) return '';
+            const theme = ZONE_THEMES[ex.category] || ZONE_THEMES.techniek;
+            return `<div class="tov-open-item">
+              <span>${ex.emoji}</span>
+              <span class="tov-open-name">${ex.title}</span>
+              <span class="tov-open-xp" style="color:${theme.color}">+${ex.points} XP</span>
+            </div>`;
+          }).join('');
+
+          return `
+            <div class="tov-card ${isLate ? 'tov-late' : ''}">
+              <div class="tov-header">
+                <div class="tov-avatar ${isLate ? 'tov-avatar-late' : ''}">${p.initials}</div>
+                <div class="tov-info">
+                  <div class="tov-name">${p.name}
+                    ${isLate ? `<span class="tov-badge-late">⚠️ achterloopt</span>` : ''}
+                  </div>
+                  <div class="tov-meta">
+                    <span class="level-chip-xs ${lvl.cls}">${lvl.icon} ${lvl.name}</span>
+                    <span class="tov-pts">⭐ ${pts} XP</span>
+                    <span class="tov-week">+${weekPts} deze week</span>
+                  </div>
+                </div>
+                <div class="tov-pct-circle">
+                  <svg viewBox="0 0 36 36" class="tov-circle-svg">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                    <circle cx="18" cy="18" r="15" fill="none"
+                      stroke="${pct >= 80 ? '#00e87a' : pct >= 40 ? '#f59e0b' : '#ef4444'}"
+                      stroke-width="3"
+                      stroke-dasharray="${(pct / 100) * 94.2} 94.2"
+                      stroke-linecap="round"
+                      transform="rotate(-90 18 18)"/>
+                  </svg>
+                  <span class="tov-circle-pct">${pct}%</span>
+                </div>
               </div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:1.1rem;font-weight:900;color:var(--gold)">${totalPoints(p.id)} pts</div>
-              <div style="font-size:0.72rem;color:var(--text-3)">${pct}% voltooid</div>
-            </div>
-          </div>
-          <div class="progress-bar" style="margin-top:12px;"><div class="progress-fill green" style="width:${pct}%"></div></div>
-        </div>`;
-    }).join('')}`;
+
+              ${catBars ? `<div class="tov-cats">${catBars}</div>` : ''}
+
+              ${openList ? `
+                <div class="tov-open-section">
+                  <div class="tov-open-label">📌 Open oefeningen</div>
+                  ${openList}
+                  ${as.filter(a => !a.completed).length > 3
+                    ? `<div class="tov-open-more">+${as.filter(a=>!a.completed).length - 3} meer</div>`
+                    : ''}
+                </div>` : `
+                <div class="tov-all-done">🎉 Alle oefeningen voltooid!</div>`}
+
+              <div class="tov-footer">
+                ${daysSince === null
+                  ? `<span class="tov-activity tov-activity-none">Nog niet begonnen</span>`
+                  : daysSince === 0
+                  ? `<span class="tov-activity tov-activity-ok">✅ Vandaag actief</span>`
+                  : daysSince === 1
+                  ? `<span class="tov-activity tov-activity-ok">Gisteren actief</span>`
+                  : daysSince < 7
+                  ? `<span class="tov-activity tov-activity-warn">${daysSince} dagen geleden actief</span>`
+                  : `<span class="tov-activity tov-activity-late">⚠️ ${daysSince} dagen inactief</span>`}
+                <span class="tov-footer-count">${doneA}/${totalA} oefeningen</span>
+              </div>
+            </div>`;
+        }).join('')}`;
 }
 
 function renderTrainerAssign() {

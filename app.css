@@ -3,8 +3,8 @@
 html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background: #060c08;
-  color: #e8f0ea;
+  background: #08090f;
+  color: #e8e8f0;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -12,9 +12,9 @@ a { text-decoration: none; color: inherit; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 input, select, textarea {
   font-family: inherit;
-  background: #0f1e14;
-  border: 1.5px solid var(--border-light);
-  color: var(--text-1);
+  background: #1a1a2e;
+  border: 1.5px solid #2a2a40;
+  color: #e8e8f0;
   border-radius: 10px;
   padding: 12px 16px;
   width: 100%;
@@ -26,15 +26,14 @@ input:focus, select:focus, textarea:focus {
   border-color: #00e87a;
   box-shadow: 0 0 0 3px rgba(0, 232, 122, 0.12);
 }
-select option { background: #0f1e14; }
+select option { background: #1a1a2e; }
 textarea { resize: vertical; min-height: 90px; }
 
 /* ===== CSS VARIABLES ===== */
 :root {
   --green: #00e87a;
   --green-dark: #00b85c;
-  --green-mid: #00c965;
-  --green-glow: rgba(0, 232, 122, 0.28);
+  --green-glow: rgba(0, 232, 122, 0.25);
   --blue: #3b82f6;
   --blue-glow: rgba(59, 130, 246, 0.25);
   --purple: #8b5cf6;
@@ -46,22 +45,21 @@ textarea { resize: vertical; min-height: 90px; }
   --bronze: #cd7c3a;
   --red: #ef4444;
   --orange: #f97316;
-  /* Dark stadium-green base palette */
-  --bg-1: #060c08;
-  --bg-2: #0b1510;
-  --bg-3: #111e16;
-  --bg-4: #182a1e;
-  --border: #1e3025;
-  --border-light: #274033;
-  --text-1: #eef5f0;
-  --text-2: #7a9e84;
-  --text-3: #3d5c45;
+  --bg-1: #07080e;
+  --bg-2: #0e0f1a;
+  --bg-3: #161728;
+  --bg-4: #1e1f35;
+  --border: #252640;
+  --border-light: #2e2f50;
+  --text-1: #f0f0ff;
+  --text-2: #9090b8;
+  --text-3: #555575;
   --header-h: 60px;
   --bottom-nav-h: 74px;
   --sidebar-w: 220px;
   --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  --xp-gradient: linear-gradient(90deg, #8b5cf6, #00c965, #00e87a);
-  --hero-gradient: linear-gradient(135deg, #0b1510 0%, #111e16 50%, #0d1a10 100%);
+  --xp-gradient: linear-gradient(90deg, #8b5cf6, #3b82f6, #00e87a);
+  --hero-gradient: linear-gradient(135deg, #0e0f1a 0%, #161728 50%, #1a1030 100%);
 }
 
 /* ===== LAYOUT ===== */
@@ -74,7 +72,7 @@ textarea { resize: vertical; min-height: 90px; }
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--header-h);
-  background: rgba(6, 12, 8, 0.96);
+  background: rgba(8, 9, 15, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -111,7 +109,7 @@ textarea { resize: vertical; min-height: 90px; }
   position: fixed;
   bottom: 0; left: 0; right: 0;
   height: var(--bottom-nav-h);
-  background: rgba(6, 12, 8, 0.97);
+  background: rgba(10, 11, 18, 0.97);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
   display: flex;
@@ -221,10 +219,10 @@ textarea { resize: vertical; min-height: 90px; }
 .nav-item:hover { color: var(--text-2); }
 .nav-item.active { color: #fff; }
 .nav-item.active .nav-icon {
-  background: linear-gradient(135deg, var(--green-dark), var(--green));
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
   border-radius: 10px;
   padding: 4px 8px;
-  box-shadow: 0 2px 10px var(--green-glow);
+  box-shadow: 0 2px 10px var(--purple-glow);
 }
 .nav-item.active::before {
   content: '';
@@ -259,7 +257,7 @@ textarea { resize: vertical; min-height: 90px; }
   text-align: left;
 }
 .sidebar-nav-item:hover { background: var(--bg-3); color: var(--text-1); }
-.sidebar-nav-item.active { background: linear-gradient(135deg, rgba(0,232,122,0.14), rgba(0,185,90,0.07)); color: var(--green); font-weight: 700; border-left: 3px solid var(--green); }
+.sidebar-nav-item.active { background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(99,102,241,0.12)); color: var(--purple-light); font-weight: 700; border-left: 3px solid var(--purple); }
 .sidebar-nav-item .s-icon { font-size: 18px; width: 24px; text-align: center; }
 .sidebar-section {
   font-size: 0.7rem;
@@ -318,13 +316,13 @@ textarea { resize: vertical; min-height: 90px; }
 }
 .btn:active { transform: scale(0.97); }
 .btn-primary {
-  background: linear-gradient(135deg, #00b85c, #00e87a);
-  color: #030a04;
-  box-shadow: 0 2px 16px rgba(0, 200, 100, 0.35);
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.35);
   font-weight: 700;
   letter-spacing: 0.3px;
 }
-.btn-primary:hover { background: linear-gradient(135deg, #00c965, #00ff85); box-shadow: 0 4px 24px rgba(0, 232, 122, 0.45); }
+.btn-primary:hover { background: linear-gradient(135deg, #a78bfa, #818cf8); box-shadow: 0 4px 20px var(--purple-glow); }
 .btn-secondary {
   background: var(--bg-3);
   color: var(--text-1);
@@ -432,13 +430,13 @@ textarea { resize: vertical; min-height: 90px; }
 /* ===== DASHBOARD ===== */
 .dashboard-hero {
   background: var(--hero-gradient);
-  border: 1px solid rgba(0, 200, 90, 0.25);
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 24px;
   padding: 28px 24px 24px;
   margin-bottom: 20px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 180, 70, 0.10);
+  box-shadow: 0 8px 40px rgba(139, 92, 246, 0.12);
 }
 .dashboard-hero::before {
   content: '';
@@ -531,7 +529,7 @@ textarea { resize: vertical; min-height: 90px; }
 .homework-card {
   background: var(--bg-2);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--green-dark);
+  border-left: 3px solid var(--purple);
   border-radius: 14px;
   padding: 16px;
   display: flex;
@@ -542,9 +540,9 @@ textarea { resize: vertical; min-height: 90px; }
   box-shadow: 0 2px 12px rgba(0,0,0,0.2);
 }
 .homework-card:hover:not(.completed) {
-  border-color: var(--border-light);
-  border-left-color: var(--green);
-  box-shadow: 0 4px 20px var(--green-glow);
+  border-color: var(--purple);
+  border-left-color: var(--purple-light);
+  box-shadow: 0 4px 20px var(--purple-glow);
   transform: translateY(-1px);
 }
 .homework-card.completed {
@@ -954,6 +952,155 @@ textarea { resize: vertical; min-height: 90px; }
   color: var(--green);
   font-weight: 700;
 }
+
+/* ===== TRAINER OVERVIEW ===== */
+.trainer-stats-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.trainer-stat-pill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 8px;
+}
+.trainer-stat-pill.tsp-alert { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.06); }
+.tsp-icon { font-size: 1.2rem; }
+.tsp-val  { font-size: 1.1rem; font-weight: 900; color: var(--text-1); }
+.tsp-lbl  { font-size: 0.62rem; font-weight: 600; color: var(--text-3); letter-spacing: 0.4px; text-transform: uppercase; }
+
+/* Player overview cards */
+.tov-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+.tov-card.tov-late { border-color: rgba(239,68,68,0.3); }
+
+.tov-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.tov-avatar {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.tov-avatar-late { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.tov-info { flex: 1; min-width: 0; }
+.tov-name {
+  font-size: 0.95rem; font-weight: 800; color: var(--text-1);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.tov-badge-late {
+  font-size: 0.62rem; font-weight: 700; color: #ef4444;
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px; padding: 2px 7px; letter-spacing: 0.3px;
+}
+.tov-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tov-pts  { font-size: 0.75rem; font-weight: 700; color: var(--gold); }
+.tov-week { font-size: 0.72rem; color: var(--text-3); }
+
+/* Circle progress */
+.tov-pct-circle {
+  position: relative;
+  width: 46px; height: 46px;
+  flex-shrink: 0;
+}
+.tov-circle-svg { width: 100%; height: 100%; }
+.tov-circle-pct {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.62rem; font-weight: 900; color: var(--text-1);
+}
+
+/* Category bars */
+.tov-cats {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: var(--bg-3);
+  border-radius: 12px;
+}
+.tov-cat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tov-cat-icon { font-size: 0.9rem; width: 20px; text-align: center; }
+.tov-cat-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.tov-cat-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+.tov-cat-pct { font-size: 0.68rem; font-weight: 800; width: 30px; text-align: right; }
+
+/* Open exercises */
+.tov-open-section {
+  margin-bottom: 12px;
+}
+.tov-open-label {
+  font-size: 0.72rem; font-weight: 700; color: var(--text-3);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.tov-open-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-3);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+}
+.tov-open-name { flex: 1; color: var(--text-1); font-weight: 600; }
+.tov-open-xp   { font-size: 0.72rem; font-weight: 800; }
+.tov-open-more {
+  font-size: 0.72rem; color: var(--text-3); text-align: center;
+  padding: 4px; font-weight: 600;
+}
+.tov-all-done {
+  text-align: center; font-size: 0.85rem;
+  color: var(--green); font-weight: 700;
+  padding: 10px; margin-bottom: 10px;
+}
+
+/* Footer row */
+.tov-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 4px;
+}
+.tov-activity        { font-size: 0.75rem; font-weight: 600; }
+.tov-activity-ok     { color: var(--green); }
+.tov-activity-warn   { color: var(--gold); }
+.tov-activity-late   { color: #ef4444; }
+.tov-activity-none   { color: var(--text-3); }
+.tov-footer-count    { font-size: 0.72rem; color: var(--text-3); font-weight: 600; }
 
 /* ===== TRAINER PANEL ===== */
 .tab-bar {
@@ -1660,7 +1807,7 @@ textarea { resize: vertical; min-height: 90px; }
 }
 .auth-tab.active {
   background: var(--green);
-  color: #040a05;
+  color: #08090f;
 }
 
 .role-picker {
@@ -1855,7 +2002,7 @@ textarea { resize: vertical; min-height: 90px; }
 
 /* ===== WORLD MAP ===== */
 .world-map {
-  background: linear-gradient(180deg, #040a05 0%, #060e08 60%, #050b07 100%);
+  background: #07080e;
   min-height: 100vh;
   margin: -24px -20px;
   padding: 0 0 80px;
@@ -1908,81 +2055,74 @@ textarea { resize: vertical; min-height: 90px; }
   border: 1px solid color-mix(in srgb, var(--zc) 30%, transparent);
 }
 
-/* Football pitch background (techniek) — grass + white lines */
+/* Football pitch background (techniek) */
 .zone-bg-pitch {
-  background-color: #061208;
+  background-color: #0a1a10;
   background-image:
-    /* pitch boundary lines */
-    linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px),
-    /* center circle ring */
-    radial-gradient(circle at 50% 50%, transparent 26%, rgba(255,255,255,0.06) 27%, rgba(255,255,255,0.06) 29%, transparent 30%),
-    /* alternating grass mow stripes */
+    /* pitch lines */
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
+    /* center circle */
+    radial-gradient(circle at 50% 50%, transparent 28%, rgba(255,255,255,0.04) 29%, rgba(255,255,255,0.04) 30%, transparent 31%),
+    /* grass stripes */
     repeating-linear-gradient(
       0deg,
-      rgba(0,200,80,0.10) 0px, rgba(0,200,80,0.10) 36px,
-      rgba(0,160,55,0.05) 36px, rgba(0,160,55,0.05) 72px
-    ),
-    /* deep pitch glow */
-    radial-gradient(ellipse at 50% 100%, rgba(0,180,60,0.12) 0%, transparent 60%);
-  background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%, 100% 100%;
+      rgba(0,180,60,0.07) 0px, rgba(0,180,60,0.07) 32px,
+      rgba(0,150,50,0.04) 32px, rgba(0,150,50,0.04) 64px
+    );
+  background-size: 60px 60px, 60px 60px, 100% 100%, 100% 100%;
 }
 
-/* Sprint track / gym floor (fysiek) — red rubber lanes on dark green */
+/* Gym/track background (fysiek) */
 .zone-bg-gym {
-  background-color: #0a1008;
+  background-color: #1a0a0a;
   background-image:
-    /* diagonal sprint lanes */
+    /* track lanes */
     repeating-linear-gradient(
-      160deg,
-      rgba(239,68,68,0.07) 0px, rgba(239,68,68,0.07) 28px,
-      transparent 28px, transparent 56px
+      170deg,
+      rgba(239,68,68,0.06) 0px, rgba(239,68,68,0.06) 24px,
+      transparent 24px, transparent 48px
     ),
-    radial-gradient(circle at 15% 85%, rgba(239,68,68,0.10) 0%, transparent 45%),
-    radial-gradient(circle at 85% 15%, rgba(239,68,68,0.07) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 50%, rgba(0,150,50,0.06) 0%, transparent 70%);
+    /* rubber texture */
+    radial-gradient(circle at 20% 80%, rgba(239,68,68,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(239,68,68,0.05) 0%, transparent 50%);
 }
 
-/* Stadium stands (mentaal) — purple floodlit arena on dark green */
+/* Stadium background (mentaal) */
 .zone-bg-stadium {
-  background-color: #080e0c;
+  background-color: #0d0a1a;
   background-image:
-    /* stadium seat rows */
+    /* seat rows */
     repeating-linear-gradient(
       0deg,
-      rgba(139,92,246,0.05) 0px, rgba(139,92,246,0.05) 18px,
-      transparent 18px, transparent 36px
+      rgba(139,92,246,0.06) 0px, rgba(139,92,246,0.06) 20px,
+      transparent 20px, transparent 40px
     ),
-    /* four corner floodlights */
-    radial-gradient(ellipse at 5%   5%,  rgba(139,92,246,0.14) 0%, transparent 40%),
-    radial-gradient(ellipse at 95%  5%,  rgba(139,92,246,0.14) 0%, transparent 40%),
-    radial-gradient(ellipse at 5%  95%,  rgba(139,92,246,0.08) 0%, transparent 40%),
-    radial-gradient(ellipse at 95% 95%,  rgba(139,92,246,0.08) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 50%,  rgba(0,150,50,0.06)   0%, transparent 60%);
+    /* stadium arc lights */
+    radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 100%, rgba(139,92,246,0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 100%, rgba(139,92,246,0.06) 0%, transparent 40%);
 }
 
-/* Champions-league night sky (inspiratie) — gold lights, deep green pitch */
+/* Floodlights background (inspiratie) */
 .zone-bg-lights {
-  background-color: #090d08;
+  background-color: #1a1200;
   background-image:
-    /* floodlight beams from top corners */
-    radial-gradient(ellipse at  8%  0%, rgba(245,158,11,0.18) 0%, transparent 45%),
-    radial-gradient(ellipse at 92%  0%, rgba(245,158,11,0.15) 0%, transparent 45%),
-    radial-gradient(ellipse at 50%  0%, rgba(245,158,11,0.08) 0%, transparent 55%),
-    /* pitch reflection */
-    radial-gradient(ellipse at 50% 100%, rgba(0,180,60,0.10) 0%, transparent 55%),
-    /* confetti sparkle dots */
-    radial-gradient(circle at 25% 40%, rgba(245,158,11,0.06) 0%, transparent 25%),
-    radial-gradient(circle at 75% 60%, rgba(245,158,11,0.05) 0%, transparent 20%);
+    /* light beams */
+    radial-gradient(ellipse at 10% 0%, rgba(245,158,11,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 0%, rgba(245,158,11,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(245,158,11,0.08) 0%, transparent 70%),
+    /* star field */
+    radial-gradient(circle at 30% 70%, rgba(245,158,11,0.05) 0%, transparent 40%);
 }
 
 .wm-zone-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-    rgba(4,10,5,0.50) 0%,
-    rgba(4,10,5,0.20) 50%,
-    rgba(4,10,5,0.55) 100%);
+    rgba(8,9,15,0.55) 0%,
+    rgba(8,9,15,0.3) 50%,
+    rgba(8,9,15,0.6) 100%);
   pointer-events: none;
   z-index: 0;
 }
