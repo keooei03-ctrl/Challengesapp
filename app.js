@@ -665,7 +665,103 @@ function renderActiveDuels(playerId) {
 }
 
 // ===== EXERCISES =====
+// ===== WORLD MAP =====
+const ZONE_THEMES = {
+  techniek:   { color: '#3b82f6', glow: 'rgba(59,130,246,0.5)',   bg: 'rgba(59,130,246,0.12)',  icon: '⚽', name: 'TECHNIEK DISTRICT',  sub: 'Beheers de bal' },
+  fysiek:     { color: '#ef4444', glow: 'rgba(239,68,68,0.5)',    bg: 'rgba(239,68,68,0.12)',   icon: '💪', name: 'FYSIEK ARENA',        sub: 'Bouw je kracht' },
+  mentaal:    { color: '#8b5cf6', glow: 'rgba(139,92,246,0.5)',   bg: 'rgba(139,92,246,0.12)',  icon: '🧠', name: 'MENTAAL ZONE',        sub: 'Train je hoofd' },
+  inspiratie: { color: '#f59e0b', glow: 'rgba(245,158,11,0.5)',   bg: 'rgba(245,158,11,0.12)',  icon: '🌟', name: 'INSPIRATIE PEAK',     sub: 'Bereik de top' },
+};
+
+function renderWorldMap() {
+  const me = getMe();
+  const assignments = getPlayerAssignments(me.id).sort((a, b) => a.id.localeCompare(b.id));
+
+  if (assignments.length === 0) return `
+    <div class="wm-empty">
+      <div class="wm-empty-icon">🗺️</div>
+      <div class="wm-empty-title">Je reis begint binnenkort</div>
+      <div class="wm-empty-sub">Je trainer wijst je eerste quests toe</div>
+    </div>`;
+
+  const activeIdx  = assignments.findIndex(a => !a.completed);
+  const totalDone  = assignments.filter(a => a.completed).length;
+  const pct        = Math.round((totalDone / assignments.length) * 100);
+
+  let html = `
+    <div class="world-map">
+      <div class="wm-top-bar">
+        <div class="wm-top-title">⚽ Voetbalreis</div>
+        <div class="wm-top-right">
+          <div class="wm-top-pct">${pct}%</div>
+          <div class="wm-top-sub">${totalDone}/${assignments.length} voltooid</div>
+        </div>
+      </div>
+      <div class="wm-global-bar"><div class="wm-global-fill" style="width:${pct}%"></div></div>`;
+
+  let lastCat = null;
+  let posIdx  = 0;
+
+  assignments.forEach((a, i) => {
+    const ex = getExercise(a.exerciseId);
+    if (!ex) return;
+    const isCompleted = a.completed;
+    const isActive    = i === activeIdx;
+    const isLocked    = !isCompleted && !isActive;
+    const status      = isCompleted ? 'completed' : isActive ? 'active' : 'locked';
+    const theme       = ZONE_THEMES[ex.category] || ZONE_THEMES.techniek;
+
+    if (ex.category !== lastCat) {
+      if (lastCat !== null) html += `<div class="wm-zone-gap"></div>`;
+      html += `
+        <div class="wm-zone-banner" style="--zc:${theme.color};--zb:${theme.bg}">
+          <div class="wm-zone-orb">${theme.icon}</div>
+          <div>
+            <div class="wm-zone-name">${theme.name}</div>
+            <div class="wm-zone-sub">${theme.sub}</div>
+          </div>
+        </div>`;
+      lastCat = ex.category;
+      posIdx  = 0;
+    }
+
+    const isRight = posIdx % 2 === 0;
+
+    if (posIdx > 0) {
+      html += `<div class="wm-conn ${isRight ? 'conn-rl' : 'conn-lr'}" style="--zc:${theme.color}"></div>`;
+    }
+
+    const labelSide = isRight ? 'label-left' : 'label-right';
+
+    html += `
+      <div class="wm-row ${isRight ? 'row-right' : 'row-left'}">
+        ${!isRight ? `<div class="wm-label ${labelSide} ${status}">
+          <div class="wm-label-name">${ex.title}</div>
+          <div class="wm-label-xp" style="color:${theme.color}">+${ex.points} XP</div>
+        </div>` : ''}
+        <div class="wm-node ${status}" style="--zc:${theme.color};--zg:${theme.glow}"
+          ${!isLocked ? `data-action="open-exercise" data-id="${ex.id}"` : ''}>
+          ${isCompleted ? `<div class="wm-node-star">⭐</div>` : ''}
+          ${isActive    ? `<div class="wm-pulse-ring"></div><div class="wm-pulse-ring delay"></div>` : ''}
+          <div class="wm-node-emoji">${isLocked ? '🔒' : ex.emoji}</div>
+          ${isActive    ? `<div class="wm-tap">TAP</div>` : ''}
+        </div>
+        ${isRight ? `<div class="wm-label ${labelSide} ${status}">
+          <div class="wm-label-name">${ex.title}</div>
+          <div class="wm-label-xp" style="color:${theme.color}">+${ex.points} XP</div>
+        </div>` : ''}
+      </div>`;
+
+    posIdx++;
+  });
+
+  html += `<div style="height:60px"></div></div>`;
+  return html;
+}
+
 function renderExercises() {
+  const me = getMe();
+  if (me.role === 'player') return renderWorldMap();
   const { category, level } = state.exerciseFilter;
   const search = state.exerciseSearch.toLowerCase().trim();
   const filtered = state.data.exercises.filter(ex =>
