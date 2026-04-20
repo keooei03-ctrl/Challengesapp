@@ -39,7 +39,7 @@ let state = {
   selectedExerciseIds: [],
   exerciseFilter: { category: 'all', level: 'all' },
   exerciseSearch: '',
-  data: { users: [], exercises: [], assignments: [], challenges: [], submissions: [], points: {}, peerChallenges: [] }
+  data: { users: [], exercises: [], assignments: [], challenges: [], submissions: [], points: {}, peerChallenges: [], settings: {} }
 };
 
 // ===== DB MAPPERS =====
@@ -59,6 +59,7 @@ async function loadAllData() {
     { data: submissions },
     { data: pointsArr },
     { data: peerChallenges },
+    { data: settingsArr },
   ] = await Promise.all([
     db.from('profiles').select('*'),
     db.from('exercises').select('*').order('created_at', { ascending: false }),
@@ -67,12 +68,16 @@ async function loadAllData() {
     db.from('submissions').select('*'),
     db.from('points').select('*'),
     db.from('peer_challenges').select('*').order('created_at', { ascending: false }),
+    db.from('settings').select('*'),
   ]);
 
   const pointsMap = {};
   (pointsArr || []).forEach(p => {
     pointsMap[p.player_id] = { homework: p.homework || 0, manual: p.manual || 0, challenges: p.challenges || 0 };
   });
+
+  const settingsMap = {};
+  (settingsArr || []).forEach(s => { settingsMap[s.key] = s.value; });
 
   state.data = {
     users:          profiles || [],
@@ -82,6 +87,7 @@ async function loadAllData() {
     submissions:    (submissions    || []).map(mapSubmission),
     points:         pointsMap,
     peerChallenges: (peerChallenges || []).map(mapPeerChallenge),
+    settings:       settingsMap,
   };
 }
 
@@ -117,6 +123,11 @@ async function dbAssignExercises(playerIds, exerciseIds) {
   });
   if (rows.length > 0) await db.from('assignments').insert(rows);
   return rows.length;
+}
+
+async function dbSetWeeklyGoal(pts) {
+  await db.from('settings').upsert({ key: 'weekly_goal', value: String(pts), updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  state.data.settings['weekly_goal'] = String(pts);
 }
 
 async function dbCreateExercise({ title, desc, category, level, videoId, points, emoji }) {
@@ -329,6 +340,25 @@ function getIncomingDuels(pid)             { return getPeerChallenges().filter(c
 function getActiveDuels(pid)               { return getPeerChallenges().filter(c => (c.challengerId === pid || c.challengedId === pid) && c.status === 'accepted'); }
 function hasSubmittedDuel(pc, pid)         { return pid === pc.challengerId ? !!pc.challengerVideo : !!pc.challengedVideo; }
 function uniqueId(p)     { return p + '_' + Date.now() + '_' + Math.floor(Math.random() * 1000); }
+function getWeekStart() {
+  const now = new Date();
+  const day = now.getDay() === 0 ? 6 : now.getDay() - 1; // maandag = 0
+  const monday = new Date(now);
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(now.getDate() - day);
+  return monday;
+}
+function getWeeklyPoints(playerId) {
+  const weekStart = getWeekStart();
+  const hwPts = state.data.assignments
+    .filter(a => a.playerId === playerId && a.completed && a.completedAt && new Date(a.completedAt) >= weekStart)
+    .reduce((sum, a) => { const ex = getExercise(a.exerciseId); return sum + (ex ? ex.points : 0); }, 0);
+  const chalPts = state.data.submissions
+    .filter(s => s.playerId === playerId && s.status === 'approved' && s.submittedAt && new Date(s.submittedAt) >= weekStart)
+    .reduce((sum, s) => { const c = getChallenge(s.challengeId); return sum + (c ? c.points : 0); }, 0);
+  return hwPts + chalPts;
+}
+function getWeeklyGoal() { return parseInt(state.data.settings['weekly_goal'] || '0'); }
 function extractYouTubeId(input) {
   if (!input) return null;
   // Full URL: youtube.com/watch?v=ID or youtu.be/ID or youtube.com/embed/ID
@@ -446,6 +476,30 @@ function renderView() {
   attachViewEvents();
 }
 
+function renderWeeklyGoalCard(playerId) {
+  const goal = getWeeklyGoal();
+  if (!goal) return '';
+  const earned = getWeeklyPoints(playerId);
+  const pct    = Math.min(100, Math.round((earned / goal) * 100));
+  const done   = earned >= goal;
+  const days   = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+  const today  = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+  return `
+    <div class="weekly-goal-card ${done ? 'done' : ''}">
+      <div class="wg-header">
+        <div class="wg-title">🎯 Weekdoel</div>
+        <div class="wg-badge ${done ? 'done' : ''}">${done ? '✓ Behaald!' : earned + ' / ' + goal + ' pts'}</div>
+      </div>
+      <div class="wg-bar-wrap">
+        <div class="wg-bar-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="wg-days">
+        ${days.map((d, i) => `<div class="wg-day ${i < today ? 'past' : i === today ? 'today' : ''}">${d}</div>`).join('')}
+      </div>
+      ${done ? `<div class="wg-congrats">🔥 Geweldig werk deze week! Zo word je beter!</div>` : `<div class="wg-sub">${goal - earned} punten te gaan deze week</div>`}
+    </div>`;
+}
+
 // ===== DASHBOARD =====
 function renderDashboard() {
   const me  = getMe();
@@ -521,6 +575,7 @@ function renderDashboard() {
       <div class="stat-card purple"><div class="stat-icon">🏅</div><div class="stat-value">${getPoints(me.id).challenges}</div><div class="stat-label">Challenge pts</div></div>
       <div class="stat-card gold"><div class="stat-icon">⭐</div><div class="stat-value">${getPoints(me.id).manual}</div><div class="stat-label">Trainer pts</div></div>
     </div>
+    ${renderWeeklyGoalCard(me.id)}
 
     <div class="section-header">
       <div class="section-title">📋 Mijn Huiswerk</div>
@@ -1009,6 +1064,19 @@ function renderTrainerPoints() {
       </div>
       <button class="btn btn-primary btn-full" style="margin-top:16px;" data-action="add-manual-points">⭐ Punten Toekennen</button>
     </div>
+    <div class="section-title" style="margin-bottom:16px;margin-top:28px;">🎯 Weekdoel Instellen</div>
+    <div class="card" style="margin-bottom:24px;">
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Punten per week</label>
+          <input type="number" id="weeklyGoalInput" placeholder="bijv. 100" min="10" max="1000" value="${getWeeklyGoal() || ''}">
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="btn btn-primary btn-sm" data-action="set-weekly-goal">Opslaan</button>
+        </div>
+      </div>
+      ${getWeeklyGoal() ? `<div style="margin-top:10px;font-size:0.82rem;color:var(--text-2)">Huidig doel: <strong style="color:var(--green)">${getWeeklyGoal()} pts/week</strong></div>` : ''}
+    </div>
     <div class="section-title" style="margin-bottom:16px;">Huidige Standen</div>
     ${players.sort((a,b)=>totalPoints(b.id)-totalPoints(a.id)).map(p => `
       <div class="leaderboard-row" style="margin-bottom:8px;">
@@ -1209,6 +1277,16 @@ function attachViewEvents() {
     showToast('❌ Inzending afgewezen', 0, 'error');
     renderView();
   }));
+
+  const weeklyGoalBtn = main.querySelector('[data-action="set-weekly-goal"]');
+  if (weeklyGoalBtn) weeklyGoalBtn.addEventListener('click', async () => {
+    const pts = parseInt(document.getElementById('weeklyGoalInput')?.value) || 0;
+    if (pts < 10) { showToast('⚠️ Minimaal 10 punten als weekdoel', 0, 'error'); return; }
+    weeklyGoalBtn.disabled = true;
+    await dbSetWeeklyGoal(pts);
+    showToast(`🎯 Weekdoel ingesteld op ${pts} punten!`, 0, 'success');
+    renderView();
+  });
 
   const manualBtn = main.querySelector('[data-action="add-manual-points"]');
   if (manualBtn) manualBtn.addEventListener('click', async () => {
