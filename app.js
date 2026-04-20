@@ -171,7 +171,8 @@ async function dbSubmitChallenge({ challengeId, videoUrl, videoFile, note }) {
 
 async function dbCreatePeerChallenge({ opponentId, title, exerciseId, points }) {
   const id = uniqueId('pc');
-  await db.from('peer_challenges').insert({ id, challenger_id: state.currentUserId, challenged_id: opponentId, title, exercise_id: exerciseId || null, points, status: 'pending' });
+  const { error } = await db.from('peer_challenges').insert({ id, challenger_id: state.currentUserId, challenged_id: opponentId, title, exercise_id: exerciseId || null, points, status: 'pending' });
+  if (error) throw new Error(error.message);
   return id;
 }
 
@@ -248,7 +249,7 @@ async function handleRegister() {
 async function handleLogout() {
   await db.auth.signOut();
   state.currentUserId = null;
-  state.data = { users: [], exercises: EXERCISES, assignments: [], challenges: [], submissions: [], points: {}, peerChallenges: [] };
+  state.data = { users: [], exercises: [], assignments: [], challenges: [], submissions: [], points: {}, peerChallenges: [] };
   document.getElementById('app').style.visibility = 'hidden';
   showAuthScreen();
 }
@@ -1681,7 +1682,7 @@ function openChallengePlayerModal(opponentId) {
     </div>
     <div class="form-group"><label class="form-label">Jouw uitdaging</label><input type="text" id="duelTitle" placeholder="bijv. Wie heeft de meeste touches in 2 min?"></div>
     <div class="form-group"><label class="form-label">Gerelateerde oefening</label>
-      <select id="duelExercise"><option value="">— Optioneel —</option>${EXERCISES.map(ex => `<option value="${ex.id}">${ex.emoji} ${ex.title}</option>`).join('')}</select></div>
+      <select id="duelExercise"><option value="">— Optioneel —</option>${state.data.exercises.map(ex => `<option value="${ex.id}">${ex.emoji} ${ex.title}</option>`).join('')}</select></div>
     <div class="form-group"><label class="form-label">Punten inzet</label><input type="number" id="duelPoints" value="100" min="25" max="500"></div>
     <button class="btn btn-primary btn-full" id="sendDuelBtn">⚔️ Uitdaging Versturen</button>`);
 
@@ -1692,11 +1693,16 @@ function openChallengePlayerModal(opponentId) {
     if (!title) { showToast('⚠️ Geef je uitdaging een beschrijving', 0, 'error'); return; }
     const btn = document.getElementById('sendDuelBtn');
     btn.disabled = true; btn.textContent = 'Versturen...';
-    const id = await dbCreatePeerChallenge({ opponentId, title, exerciseId, points });
-    state.data.peerChallenges.unshift({ id, challengerId: state.currentUserId, challengedId: opponentId, title, exerciseId, points, status: 'pending', createdAt: new Date().toISOString(), challengerVideo: null, challengedVideo: null, winnerId: null });
-    closeModal();
-    showToast(`⚔️ Uitdaging verstuurd naar ${opponent.name.split(' ')[0]}!`, 0, 'success');
-    renderView();
+    try {
+      const id = await dbCreatePeerChallenge({ opponentId, title, exerciseId, points });
+      state.data.peerChallenges.unshift({ id, challengerId: state.currentUserId, challengedId: opponentId, title, exerciseId, points, status: 'pending', createdAt: new Date().toISOString(), challengerVideo: null, challengedVideo: null, winnerId: null });
+      closeModal();
+      showToast(`⚔️ Uitdaging verstuurd naar ${opponent.name.split(' ')[0]}!`, 0, 'success');
+      renderView();
+    } catch (err) {
+      btn.disabled = false; btn.textContent = '⚔️ Uitdaging Versturen';
+      showToast('❌ Kon duel niet aanmaken: ' + err.message, 0, 'error');
+    }
   });
 }
 
