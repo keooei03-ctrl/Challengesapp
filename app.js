@@ -667,26 +667,38 @@ function renderActiveDuels(playerId) {
 // ===== EXERCISES =====
 // ===== WORLD MAP =====
 const ZONE_THEMES = {
-  techniek:   { color: '#3b82f6', glow: 'rgba(59,130,246,0.5)',   bg: 'rgba(59,130,246,0.12)',  icon: '⚽', name: 'TECHNIEK DISTRICT',  sub: 'Beheers de bal' },
-  fysiek:     { color: '#ef4444', glow: 'rgba(239,68,68,0.5)',    bg: 'rgba(239,68,68,0.12)',   icon: '💪', name: 'FYSIEK ARENA',        sub: 'Bouw je kracht' },
-  mentaal:    { color: '#8b5cf6', glow: 'rgba(139,92,246,0.5)',   bg: 'rgba(139,92,246,0.12)',  icon: '🧠', name: 'MENTAAL ZONE',        sub: 'Train je hoofd' },
-  inspiratie: { color: '#f59e0b', glow: 'rgba(245,158,11,0.5)',   bg: 'rgba(245,158,11,0.12)',  icon: '🌟', name: 'INSPIRATIE PEAK',     sub: 'Bereik de top' },
+  techniek:   { color: '#3b82f6', glow: 'rgba(59,130,246,0.5)',   bg: 'rgba(59,130,246,0.12)',  icon: '⚽', name: 'TECHNIEK DISTRICT',  sub: 'Beheers de bal',   bgClass: 'zone-bg-pitch'   },
+  fysiek:     { color: '#ef4444', glow: 'rgba(239,68,68,0.5)',    bg: 'rgba(239,68,68,0.12)',   icon: '💪', name: 'FYSIEK ARENA',        sub: 'Bouw je kracht',   bgClass: 'zone-bg-gym'     },
+  mentaal:    { color: '#8b5cf6', glow: 'rgba(139,92,246,0.5)',   bg: 'rgba(139,92,246,0.12)',  icon: '🧠', name: 'MENTAAL ZONE',        sub: 'Train je hoofd',   bgClass: 'zone-bg-stadium' },
+  inspiratie: { color: '#f59e0b', glow: 'rgba(245,158,11,0.5)',   bg: 'rgba(245,158,11,0.12)',  icon: '🌟', name: 'INSPIRATIE PEAK',     sub: 'Bereik de top',    bgClass: 'zone-bg-lights'  },
 };
 
 function renderWorldMap() {
   const me = getMe();
-  const assignments = getPlayerAssignments(me.id).sort((a, b) => a.id.localeCompare(b.id));
+  const assignments = getPlayerAssignments(me.id).sort((a, b) => new Date(a.assignedAt) - new Date(b.assignedAt));
 
   if (assignments.length === 0) return `
     <div class="wm-empty">
       <div class="wm-empty-icon">🗺️</div>
       <div class="wm-empty-title">Je reis begint binnenkort</div>
-      <div class="wm-empty-sub">Je trainer wijst je eerste quests toe</div>
+      <div class="wm-empty-sub">Je trainer wijst je oefeningen toe</div>
     </div>`;
 
-  const activeIdx  = assignments.findIndex(a => !a.completed);
-  const totalDone  = assignments.filter(a => a.completed).length;
-  const pct        = Math.round((totalDone / assignments.length) * 100);
+  const totalDone = assignments.filter(a => a.completed).length;
+  const pct       = Math.round((totalDone / assignments.length) * 100);
+
+  // Group by category, preserving order of first appearance
+  const catOrder = [];
+  const byCategory = {};
+  assignments.forEach(a => {
+    const ex = getExercise(a.exerciseId);
+    if (!ex) return;
+    if (!byCategory[ex.category]) {
+      byCategory[ex.category] = [];
+      catOrder.push(ex.category);
+    }
+    byCategory[ex.category].push({ a, ex });
+  });
 
   let html = `
     <div class="world-map">
@@ -699,63 +711,67 @@ function renderWorldMap() {
       </div>
       <div class="wm-global-bar"><div class="wm-global-fill" style="width:${pct}%"></div></div>`;
 
-  let lastCat = null;
-  let posIdx  = 0;
+  catOrder.forEach((cat, catI) => {
+    const theme = ZONE_THEMES[cat] || ZONE_THEMES.techniek;
+    const items = byCategory[cat];
+    // Each category is independent: first uncompleted = active
+    const activeIdxInCat = items.findIndex(({ a }) => !a.completed);
+    const doneCat = items.filter(({ a }) => a.completed).length;
 
-  assignments.forEach((a, i) => {
-    const ex = getExercise(a.exerciseId);
-    if (!ex) return;
-    const isCompleted = a.completed;
-    const isActive    = i === activeIdx;
-    const isLocked    = !isCompleted && !isActive;
-    const status      = isCompleted ? 'completed' : isActive ? 'active' : 'locked';
-    const theme       = ZONE_THEMES[ex.category] || ZONE_THEMES.techniek;
+    if (catI > 0) html += `<div class="wm-zone-gap"></div>`;
 
-    if (ex.category !== lastCat) {
-      if (lastCat !== null) html += `<div class="wm-zone-gap"></div>`;
-      html += `
-        <div class="wm-zone-banner" style="--zc:${theme.color};--zb:${theme.bg}">
+    html += `
+      <div class="wm-zone-section ${theme.bgClass}" style="--zc:${theme.color};--zb:${theme.bg};--zg:${theme.glow}">
+        <div class="wm-zone-overlay"></div>
+        <div class="wm-zone-banner">
           <div class="wm-zone-orb">${theme.icon}</div>
-          <div>
+          <div class="wm-zone-info">
             <div class="wm-zone-name">${theme.name}</div>
             <div class="wm-zone-sub">${theme.sub}</div>
           </div>
-        </div>`;
-      lastCat = ex.category;
-      posIdx  = 0;
-    }
-
-    const isRight = posIdx % 2 === 0;
-
-    if (posIdx > 0) {
-      html += `<div class="wm-conn ${isRight ? 'conn-rl' : 'conn-lr'}" style="--zc:${theme.color}"></div>`;
-    }
-
-    const labelSide = isRight ? 'label-left' : 'label-right';
-
-    html += `
-      <div class="wm-row ${isRight ? 'row-right' : 'row-left'}">
-        ${!isRight ? `<div class="wm-label ${labelSide} ${status}">
-          <div class="wm-label-name">${ex.title}</div>
-          <div class="wm-label-xp" style="color:${theme.color}">+${ex.points} XP</div>
-        </div>` : ''}
-        <div class="wm-node ${status}" style="--zc:${theme.color};--zg:${theme.glow}"
-          ${!isLocked ? `data-action="open-exercise" data-id="${ex.id}"` : ''}>
-          ${isCompleted ? `<div class="wm-node-star">⭐</div>` : ''}
-          ${isActive    ? `<div class="wm-pulse-ring"></div><div class="wm-pulse-ring delay"></div>` : ''}
-          <div class="wm-node-emoji">${isLocked ? '🔒' : ex.emoji}</div>
-          ${isActive    ? `<div class="wm-tap">TAP</div>` : ''}
+          <div class="wm-zone-progress">
+            <div class="wm-zone-pct">${doneCat}/${items.length}</div>
+            <div class="wm-zone-pct-label">voltooid</div>
+          </div>
         </div>
-        ${isRight ? `<div class="wm-label ${labelSide} ${status}">
-          <div class="wm-label-name">${ex.title}</div>
-          <div class="wm-label-xp" style="color:${theme.color}">+${ex.points} XP</div>
-        </div>` : ''}
-      </div>`;
+        <div class="wm-zone-nodes">`;
 
-    posIdx++;
+    items.forEach(({ a, ex }, i) => {
+      const isCompleted = a.completed;
+      const isActive    = i === activeIdxInCat;
+      const isLocked    = !isCompleted && !isActive;
+      const status      = isCompleted ? 'completed' : isActive ? 'active' : 'locked';
+      const isRight     = i % 2 === 0;
+      const labelSide   = isRight ? 'label-left' : 'label-right';
+
+      if (i > 0) {
+        html += `<div class="wm-conn ${isRight ? 'conn-rl' : 'conn-lr'}"></div>`;
+      }
+
+      html += `
+        <div class="wm-row ${isRight ? 'row-right' : 'row-left'}">
+          ${!isRight ? `<div class="wm-label ${labelSide} ${status}">
+            <div class="wm-label-name">${ex.title}</div>
+            <div class="wm-label-xp">+${ex.points} XP</div>
+          </div>` : ''}
+          <div class="wm-node ${status}"
+            ${!isLocked ? `data-action="open-exercise" data-id="${ex.id}"` : ''}>
+            ${isCompleted ? `<div class="wm-node-star">⭐</div>` : ''}
+            ${isActive    ? `<div class="wm-pulse-ring"></div><div class="wm-pulse-ring delay"></div>` : ''}
+            <div class="wm-node-emoji">${isLocked ? '🔒' : ex.emoji}</div>
+            ${isActive    ? `<div class="wm-tap">TAP</div>` : ''}
+          </div>
+          ${isRight ? `<div class="wm-label ${labelSide} ${status}">
+            <div class="wm-label-name">${ex.title}</div>
+            <div class="wm-label-xp">+${ex.points} XP</div>
+          </div>` : ''}
+        </div>`;
+    });
+
+    html += `</div></div>`; // close wm-zone-nodes + wm-zone-section
   });
 
-  html += `<div style="height:60px"></div></div>`;
+  html += `<div style="height:80px"></div></div>`;
   return html;
 }
 

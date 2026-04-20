@@ -1853,8 +1853,7 @@ textarea { resize: vertical; min-height: 90px; }
 
 /* ===== WORLD MAP ===== */
 .world-map {
-  padding: 0 0 40px;
-  background: linear-gradient(180deg, #07080e 0%, #0a1020 40%, #0d0a1a 100%);
+  background: #07080e;
   min-height: 100vh;
   margin: -24px -20px;
   padding: 0 0 80px;
@@ -1878,7 +1877,7 @@ textarea { resize: vertical; min-height: 90px; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 20px 8px;
+  padding: 24px 24px 8px;
 }
 .wm-top-title { font-size: 1rem; font-weight: 800; color: var(--text-1); }
 .wm-top-right { text-align: right; }
@@ -1887,7 +1886,7 @@ textarea { resize: vertical; min-height: 90px; }
 .wm-global-bar {
   height: 4px;
   background: rgba(255,255,255,0.06);
-  margin: 0 20px 28px;
+  margin: 0 24px 20px;
   border-radius: 2px;
   overflow: hidden;
 }
@@ -1898,57 +1897,146 @@ textarea { resize: vertical; min-height: 90px; }
   transition: width 1s ease;
 }
 
+/* Zone sections with backgrounds */
+.wm-zone-section {
+  position: relative;
+  border-radius: 24px;
+  margin: 0 12px 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--zc) 30%, transparent);
+}
+
+/* Football pitch background (techniek) */
+.zone-bg-pitch {
+  background-color: #0a1a10;
+  background-image:
+    /* pitch lines */
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
+    /* center circle */
+    radial-gradient(circle at 50% 50%, transparent 28%, rgba(255,255,255,0.04) 29%, rgba(255,255,255,0.04) 30%, transparent 31%),
+    /* grass stripes */
+    repeating-linear-gradient(
+      0deg,
+      rgba(0,180,60,0.07) 0px, rgba(0,180,60,0.07) 32px,
+      rgba(0,150,50,0.04) 32px, rgba(0,150,50,0.04) 64px
+    );
+  background-size: 60px 60px, 60px 60px, 100% 100%, 100% 100%;
+}
+
+/* Gym/track background (fysiek) */
+.zone-bg-gym {
+  background-color: #1a0a0a;
+  background-image:
+    /* track lanes */
+    repeating-linear-gradient(
+      170deg,
+      rgba(239,68,68,0.06) 0px, rgba(239,68,68,0.06) 24px,
+      transparent 24px, transparent 48px
+    ),
+    /* rubber texture */
+    radial-gradient(circle at 20% 80%, rgba(239,68,68,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(239,68,68,0.05) 0%, transparent 50%);
+}
+
+/* Stadium background (mentaal) */
+.zone-bg-stadium {
+  background-color: #0d0a1a;
+  background-image:
+    /* seat rows */
+    repeating-linear-gradient(
+      0deg,
+      rgba(139,92,246,0.06) 0px, rgba(139,92,246,0.06) 20px,
+      transparent 20px, transparent 40px
+    ),
+    /* stadium arc lights */
+    radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 100%, rgba(139,92,246,0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 100%, rgba(139,92,246,0.06) 0%, transparent 40%);
+}
+
+/* Floodlights background (inspiratie) */
+.zone-bg-lights {
+  background-color: #1a1200;
+  background-image:
+    /* light beams */
+    radial-gradient(ellipse at 10% 0%, rgba(245,158,11,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 0%, rgba(245,158,11,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(245,158,11,0.08) 0%, transparent 70%),
+    /* star field */
+    radial-gradient(circle at 30% 70%, rgba(245,158,11,0.05) 0%, transparent 40%);
+}
+
+.wm-zone-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(8,9,15,0.55) 0%,
+    rgba(8,9,15,0.3) 50%,
+    rgba(8,9,15,0.6) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* Zone banner */
 .wm-zone-banner {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 8px 20px 24px;
-  padding: 16px 20px;
-  background: var(--zb);
-  border: 1px solid color-mix(in srgb, var(--zc) 40%, transparent);
-  border-radius: 18px;
+  padding: 18px 20px 14px;
   position: relative;
-  overflow: hidden;
+  z-index: 1;
+  border-bottom: 1px solid color-mix(in srgb, var(--zc) 20%, transparent);
 }
-.wm-zone-banner::after {
-  content: '';
-  position: absolute;
-  right: -20px; top: -20px;
-  width: 100px; height: 100px;
-  background: radial-gradient(circle, var(--zb) 0%, transparent 70%);
-}
+.wm-zone-info { flex: 1; }
 .wm-zone-orb {
   width: 52px; height: 52px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--zc) 20%, transparent);
-  border: 2px solid color-mix(in srgb, var(--zc) 50%, transparent);
+  border: 2px solid color-mix(in srgb, var(--zc) 60%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
   flex-shrink: 0;
-  box-shadow: 0 0 20px color-mix(in srgb, var(--zc) 30%, transparent);
+  box-shadow: 0 0 24px var(--zg), inset 0 0 12px color-mix(in srgb, var(--zc) 10%, transparent);
 }
 .wm-zone-name {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 900;
   color: var(--zc);
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
+  text-shadow: 0 0 12px var(--zg);
 }
 .wm-zone-sub {
   font-size: 0.8rem;
   color: var(--text-2);
-  margin-top: 2px;
+  margin-top: 3px;
   font-weight: 500;
 }
-.wm-zone-gap { height: 16px; }
+.wm-zone-progress {
+  text-align: center;
+  background: color-mix(in srgb, var(--zc) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--zc) 30%, transparent);
+  border-radius: 12px;
+  padding: 6px 12px;
+}
+.wm-zone-pct { font-size: 1rem; font-weight: 900; color: var(--zc); }
+.wm-zone-pct-label { font-size: 0.6rem; font-weight: 700; color: var(--text-3); letter-spacing: 0.5px; }
+
+.wm-zone-nodes {
+  position: relative;
+  z-index: 1;
+  padding: 20px 0 24px;
+}
+
+.wm-zone-gap { height: 20px; }
 
 /* Connector paths */
 .wm-conn {
   height: 56px;
-  opacity: 0.55;
+  opacity: 0.6;
 }
 .conn-lr {
   border-right: 3px dashed var(--zc);
@@ -1994,6 +2082,7 @@ textarea { resize: vertical; min-height: 90px; }
   font-weight: 800;
   margin-top: 3px;
   letter-spacing: 0.3px;
+  color: var(--zc);
 }
 .wm-label.locked .wm-label-name { color: var(--text-3); }
 .wm-label.locked .wm-label-xp   { color: var(--text-3) !important; }
