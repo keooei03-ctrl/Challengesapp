@@ -411,11 +411,11 @@ function renderHeader() {
 }
 
 const PLAYER_VIEWS  = [
-  { id: 'dashboard',   label: 'Dashboard',  icon: '🏠' },
-  { id: 'exercises',   label: 'Oefeningen', icon: '📚' },
-  { id: 'challenges',  label: 'Uitdagingen',icon: '🏆' },
-  { id: 'leaderboard', label: 'Ranglijst',  icon: '📊' },
-  { id: 'profile',     label: 'Profiel',    icon: '👤' },
+  { id: 'dashboard',   label: 'Home',      icon: '🏠' },
+  { id: 'exercises',   label: 'Trainingen', icon: '⚔️' },
+  { id: 'challenges',  label: 'Missies',   icon: '🔥' },
+  { id: 'leaderboard', label: 'Ranking',   icon: '👑' },
+  { id: 'profile',     label: 'Profiel',   icon: '⚡' },
 ];
 const TRAINER_VIEWS = [
   { id: 'trainer',     label: 'Panel',      icon: '🎓' },
@@ -513,7 +513,7 @@ function renderDashboard() {
   const pendingCount   = assignments.filter(a => !a.completed).length;
 
   const homeworkHtml = assignments.length === 0
-    ? `<div class="empty-state"><div class="empty-icon">📋</div><p>Nog geen huiswerk toegewezen door je trainer</p></div>`
+    ? `<div class="empty-state"><div class="empty-icon">⚔️</div><p>Nog geen quests toegewezen — check later terug!</p></div>`
     : assignments.map(a => {
         const ex = getExercise(a.exerciseId);
         if (!ex) return '';
@@ -530,7 +530,7 @@ function renderDashboard() {
             </div>
             ${a.completed
               ? `<div class="completed-check">✓</div>`
-              : `<button class="btn btn-primary btn-sm" data-action="complete-hw" data-assignment="${a.id}" data-points="${ex.points}" data-player="${a.playerId}">Voltooid ✓</button>`}
+              : `<button class="btn btn-primary btn-sm" data-action="complete-hw" data-assignment="${a.id}" data-points="${ex.points}" data-player="${a.playerId}">✓ Afronden  +${ex.points} XP</button>`}
           </div>`;
       }).join('');
 
@@ -543,13 +543,13 @@ function renderDashboard() {
     <div class="dashboard-hero">
       <div class="hero-greeting">Welkom terug 👋</div>
       <div class="hero-name">Hey, <span>${me.name.split(' ')[0]}!</span></div>
-      <div style="font-size:0.85rem;color:var(--text-2)">Blijf pushen — het verschil maak je buiten het veld.</div>
+      <div style="font-size:0.82rem;color:var(--text-2);letter-spacing:0.3px">Elke training brengt je dichter bij je doel. 🔥</div>
       <div class="hero-points-row">
         <div class="hero-points-badge">
           <span>🏆</span>
           <div>
             <div class="hero-points-value" id="heroPts">${pts}</div>
-            <div class="hero-points-label">Totale punten</div>
+            <div class="hero-points-label">Totale XP</div>
           </div>
         </div>
         <div style="display:flex;gap:10px;">
@@ -570,22 +570,22 @@ function renderDashboard() {
       </div>
     </div>
 
-    <div class="grid-3" style="margin-bottom:8px;">
-      <div class="stat-card green"><div class="stat-icon">📝</div><div class="stat-value">${getPoints(me.id).homework}</div><div class="stat-label">Huiswerk pts</div></div>
-      <div class="stat-card purple"><div class="stat-icon">🏅</div><div class="stat-value">${getPoints(me.id).challenges}</div><div class="stat-label">Challenge pts</div></div>
-      <div class="stat-card gold"><div class="stat-icon">⭐</div><div class="stat-value">${getPoints(me.id).manual}</div><div class="stat-label">Trainer pts</div></div>
+    <div class="grid-3" style="margin-bottom:12px;">
+      <div class="stat-card green"><div class="stat-icon">⚔️</div><div class="stat-value">${getPoints(me.id).homework}</div><div class="stat-label">Quest XP</div></div>
+      <div class="stat-card purple"><div class="stat-icon">🏆</div><div class="stat-value">${getPoints(me.id).challenges}</div><div class="stat-label">Mission XP</div></div>
+      <div class="stat-card gold"><div class="stat-icon">⭐</div><div class="stat-value">${getPoints(me.id).manual}</div><div class="stat-label">Bonus XP</div></div>
     </div>
     ${renderWeeklyGoalCard(me.id)}
 
     <div class="section-header">
-      <div class="section-title">📋 Mijn Huiswerk</div>
-      <button class="btn btn-secondary btn-sm" data-view-nav="exercises">Bekijk oefeningen</button>
+      <div class="section-title">⚔️ Dagelijkse Quests</div>
+      <button class="btn btn-secondary btn-sm" data-view-nav="exercises">Alle trainingen</button>
     </div>
     ${homeworkHtml}
 
     ${activeChallenges.length > 0 ? `
       <div class="section-header">
-        <div class="section-title">🔥 Actieve Uitdagingen</div>
+        <div class="section-title">🔥 Actieve Missies</div>
         <button class="btn btn-secondary btn-sm" data-view-nav="challenges">Alle</button>
       </div>
       ${activeChallenges.slice(0, 2).map(c => {
